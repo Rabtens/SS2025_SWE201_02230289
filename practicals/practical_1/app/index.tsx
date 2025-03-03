@@ -1,12 +1,25 @@
 import React, { useState, useRef } from "react";
-import { 
-  View, Text, Image, TouchableOpacity, 
-  StyleSheet, ScrollView, Dimensions, Modal,
-  StatusBar, TouchableWithoutFeedback
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  Modal,
+  StatusBar,
+  TouchableWithoutFeedback,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+
 const screenWidth = Dimensions.get("window").width;
+
 // Image and text data
 const slides = [
   {
@@ -25,37 +38,57 @@ const slides = [
     subtitle: "Up to three steps with every trip - perfect for travel with friends and family.",
   },
 ];
+
 export default function HomeScreen() {
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
-  const languages = [
-    { name: "English", code: "en" },
-    { name: "Bahasa Indonesia", code: "id" },
-    { name: "Tiếng Việt", code: "vi" }
-  ];
+  const [phoneNumber, setPhoneNumber] = useState("92325933");
+  const [countryCode, setCountryCode] = useState("+65");
+
   const openLanguageModal = () => {
     setLanguageModalVisible(true);
   };
+
   const closeLanguageModal = () => {
     setLanguageModalVisible(false);
   };
+
   const selectLanguage = (language: string) => {
     setSelectedLanguage(language);
   };
+
+  const languages = [
+    { name: "English", code: "en" },
+    { name: "Bahasa Indonesia", code: "id" },
+    { name: "Tiếng Việt", code: "vi" },
+  ];
+
   return (
     <>
       <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
-      
+
       <SafeAreaView style={styles.container}>
+        {/* Status Bar */}
+        <View style={styles.statusBar}>
+          <Text style={styles.timeText}>3:04</Text>
+          <View style={styles.statusIcons}>
+            <Ionicons name="wifi" size={16} color="#000" />
+            <View style={styles.batteryContainer}>
+              <Text style={styles.batteryText}>38</Text>
+              <Ionicons name="battery-full" size={16} color="#000" />
+            </View>
+          </View>
+        </View>
+
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Image 
-              source={require("/home/kuenzangrabten/Desktop/SS2025_SWE201_02230289/practicals/practical_1/assets/images/gojek.png")} 
-              style={styles.logo} 
+            <Image
+              source={require("/home/kuenzangrabten/Desktop/SS2025_SWE201_02230289/practicals/practical_1/assets/images/gojek.png")}
+              style={styles.logo}
             />
           </View>
           <TouchableOpacity style={styles.languageContainer} onPress={openLanguageModal}>
@@ -64,8 +97,7 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
         </View>
-        
-        {/* Scrollable Images & Text */}
+
         <ScrollView
           ref={scrollViewRef}
           horizontal
@@ -84,29 +116,31 @@ export default function HomeScreen() {
             </View>
           ))}
         </ScrollView>
-        
+
         {/* Page Indicators (Dots) */}
         <View style={styles.dotContainer}>
           {slides.map((_, index) => (
-            <View 
-              key={index} 
-              style={[styles.dot, currentIndex === index && styles.activeDot]} 
+            <View
+              key={index}
+              style={[styles.dot, currentIndex === index && styles.activeDot]}
             />
           ))}
         </View>
-        
-        {/* Login Buttons */}
-        <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={() => navigation.navigate("login")}
-        >
-          <Text style={styles.loginText}>Log in</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.signupButton}>
-          <Text style={styles.signupText}>I'm new, sign me up</Text>
-        </TouchableOpacity>
-        
+
+        {/* Login and Signup Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("login")}
+          >
+            <Text style={styles.loginText}>Log in</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.signupButton}>
+            <Text style={styles.signupText}>I'm new, sign me up</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Terms */}
         <Text style={styles.terms}>
           By logging in or registering, you agree to our{" "}
@@ -114,6 +148,7 @@ export default function HomeScreen() {
           <Text style={styles.link}>Privacy policy</Text>.
         </Text>
       </SafeAreaView>
+
       {/* Language Selection Modal */}
       <Modal
         visible={languageModalVisible}
@@ -128,8 +163,8 @@ export default function HomeScreen() {
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Change language</Text>
                   <Text style={styles.modalSubtitle}>Which language do you prefer?</Text>
-                  <TouchableOpacity 
-                    style={styles.closeButton} 
+                  <TouchableOpacity
+                    style={styles.closeButton}
                     onPress={closeLanguageModal}
                   >
                     <View style={styles.closeButtonCircle}>
@@ -153,7 +188,7 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                   ))}
                 </View>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.continueButton}
                   onPress={closeLanguageModal}
                 >
@@ -169,28 +204,50 @@ export default function HomeScreen() {
     </>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    padding: 20,
     backgroundColor: "#fff",
   },
+  statusBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    height: 30,
+  },
+  timeText: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  statusIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  batteryContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  batteryText: {
+    fontSize: 12,
+    marginRight: 2,
+  },
   header: {
-    width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   logoContainer: {
-    height: 36, // Match the height of language button (including padding)
+    height: 36,
     justifyContent: "center",
   },
   logo: {
-    width: 120, // Further increased to be more prominent
-    height: 36, // Match the height of language button with padding
+    width: 120,
+    height: 36,
     resizeMode: "contain",
   },
   languageContainer: {
@@ -198,11 +255,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   languageButton: {
-    backgroundColor: "#F5F5F5", // Light gray background
-    borderRadius: 16, // Rounded corners
+    backgroundColor: "#F5F5F5",
+    borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    height: 36, // Fixed height to match the logo
+    height: 36,
   },
   languageText: {
     fontSize: 14,
@@ -217,8 +274,9 @@ const styles = StyleSheet.create({
   },
   illustration: {
     width: "90%",
-    height: 180,
+    height: 250,
     resizeMode: "contain",
+    borderRadius: 16,
   },
   title: {
     fontSize: 20,
@@ -234,7 +292,7 @@ const styles = StyleSheet.create({
   dotContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 50,
+    marginBottom: 20,
   },
   dot: {
     width: 8,
@@ -246,41 +304,46 @@ const styles = StyleSheet.create({
   activeDot: {
     backgroundColor: "green",
   },
+  buttonContainer: {
+    width: "100%",
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
   loginButton: {
-    width: "90%",
+    width: "100%",
     height: 50,
-    padding: 15,
     backgroundColor: "green",
-    borderRadius: 50,
+    borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
   },
   loginText: {
     color: "white",
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: "bold",
-    textAlign: "center",
   },
   signupButton: {
-    width: "90%",
-    padding: 15,
+    width: "100%",
+    height: 50,
     backgroundColor: "white",
-    borderRadius: 50,
+    borderRadius: 25,
     borderWidth: 1,
     borderColor: "green",
     alignItems: "center",
-    marginBottom: 20,
+    justifyContent: "center",
   },
   signupText: {
     color: "green",
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: "bold",
   },
   terms: {
     fontSize: 12,
     color: "#777",
     textAlign: "center",
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   link: {
     color: "green",
