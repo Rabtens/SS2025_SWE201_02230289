@@ -1,207 +1,156 @@
-import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-  Modal,
-  StatusBar,
-  TouchableWithoutFeedback,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Modal } from "react-native";
+import { useRouter } from "expo-router";
+import Swiper from "react-native-swiper";
 
-const screenWidth = Dimensions.get("window").width;
+const { width, height } = Dimensions.get("window");
 
-// Image and text data
 const slides = [
   {
-    image: require("/home/kuenzangrabten/Desktop/SS2025_SWE201_02230289/practicals/practical_1/assets/images/image1.png"),
+    image: require("@/assets/images/image.png"),
     title: "Get going with us",
-    subtitle: "Use GoCar to get across town – from anywhere, at any time.",
+    description: "Use GoCar to get across town – from anywhere, at any time.",
   },
   {
-    image: require("/home/kuenzangrabten/Desktop/SS2025_SWE201_02230289/practicals/practical_1/assets/images/image2.png"),
+    image: require("@/assets/images/image2.png"),
     title: "Welcome to Gojek!",
-    subtitle: "We're your go-to app for hassle-free commutes.",
+    description: "We're your go-to app for hassle-free commutes.",
   },
   {
-    image: require("/home/kuenzangrabten/Desktop/SS2025_SWE201_02230289/practicals/practical_1/assets/images/image3.png"),
+    image: require("@/assets/images/image3.png"),
     title: "Rides for all",
-    subtitle: "Up to three steps with every trip - perfect for travel with friends and family.",
+    description: "Up to three stops with every trip - perfect for travel with friends and family.",
   },
 ];
 
+const languages = [
+  { code: "en", name: "English" },
+  { code: "id", name: "Bahasa Indonesia" },
+  { code: "vi", name: "Tiếng Việt" },
+];
+
 export default function HomeScreen() {
-  const navigation = useNavigation();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const router = useRouter();
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("English");
-  const [phoneNumber, setPhoneNumber] = useState("92325933");
-  const [countryCode, setCountryCode] = useState("+65");
+  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const openLanguageModal = () => {
-    setLanguageModalVisible(true);
+  const toggleLanguageModal = () => {
+    setLanguageModalVisible(!languageModalVisible);
   };
 
-  const closeLanguageModal = () => {
-    setLanguageModalVisible(false);
-  };
-
-  const selectLanguage = (language: string) => {
+  const handleLanguageSelect = (language) => {
     setSelectedLanguage(language);
   };
 
-  const languages = [
-    { name: "English", code: "en" },
-    { name: "Bahasa Indonesia", code: "id" },
-    { name: "Tiếng Việt", code: "vi" },
-  ];
-
   return (
-    <>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
-
-      <SafeAreaView style={styles.container}>
-        {/* Status Bar */}
-        <View style={styles.statusBar}>
-          <Text style={styles.timeText}>3:04</Text>
-          <View style={styles.statusIcons}>
-            <Ionicons name="wifi" size={16} color="#000" />
-            <View style={styles.batteryContainer}>
-              <Text style={styles.batteryText}>38</Text>
-              <Ionicons name="battery-full" size={16} color="#000" />
-            </View>
-          </View>
-        </View>
-
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("/home/kuenzangrabten/Desktop/SS2025_SWE201_02230289/practicals/practical_1/assets/images/gojek.png")}
-              style={styles.logo}
-            />
-          </View>
-          <TouchableOpacity style={styles.languageContainer} onPress={openLanguageModal}>
-            <View style={styles.languageButton}>
-              <Text style={styles.languageText}>{selectedLanguage}</Text>
-            </View>
+    <View style={styles.container}>
+      {/* Header with Logo and Language Button */}
+      <View style={styles.header}>
+        <Image source={require("@/assets/images/gojek.png")} style={styles.logo} resizeMode="contain" />
+        <View style={styles.rightContainer}>
+          <TouchableOpacity 
+            style={styles.languageButton}
+            onPress={toggleLanguageModal}
+          >
+            <Text style={styles.languageText}>🇬🇧 English</Text>
           </TouchableOpacity>
         </View>
-
-        <ScrollView
-          ref={scrollViewRef}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={(event) => {
-            const newIndex = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
-            setCurrentIndex(newIndex);
-          }}
+      </View>
+      
+      {/* Swiper for Onboarding Screens */}
+      <View style={styles.swiperContainer}>
+        <Swiper 
+          loop={false}
+          onIndexChanged={(index) => setActiveIndex(index)}
+          showsPagination={false} // Hide default pagination
         >
           {slides.map((slide, index) => (
             <View key={index} style={styles.slide}>
-              <Image source={slide.image} style={styles.illustration} />
+              <Image source={slide.image} style={styles.illustration} resizeMode="contain" />
               <Text style={styles.title}>{slide.title}</Text>
-              <Text style={styles.subtitle}>{slide.subtitle}</Text>
+              <Text style={styles.description}>{slide.description}</Text>
             </View>
           ))}
-        </ScrollView>
-
-        {/* Page Indicators (Dots) */}
-        <View style={styles.dotContainer}>
+        </Swiper>
+        
+        {/* Custom Dots Pagination - Outside the Swiper but in a fixed position */}
+        <View style={styles.dotsContainer}>
           {slides.map((_, index) => (
             <View
               key={index}
-              style={[styles.dot, currentIndex === index && styles.activeDot]}
+              style={[
+                styles.dot,
+                index === activeIndex ? styles.activeDot : null
+              ]}
             />
           ))}
         </View>
-
-        {/* Login and Signup Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => navigation.navigate("login")}
-          >
-            <Text style={styles.loginText}>Log in</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.signupButton}>
-            <Text style={styles.signupText}>I'm new, sign me up</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Terms */}
-        <Text style={styles.terms}>
+      </View>
+      
+      {/* Bottom section with buttons */}
+      <View style={styles.bottomSection}>
+        {/* Buttons */}
+        <TouchableOpacity style={styles.loginButton} onPress={() => router.push("/tabs/app/signup")}>
+          <Text style={styles.loginText}>Log in</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.signupButton} onPress={() => router.push("/tabs/app/signup")}>
+          <Text style={styles.signupText}>I'm new, sign me up</Text>
+        </TouchableOpacity>
+        
+        {/* Terms & Privacy */}
+        <Text style={styles.termsText}>
           By logging in or registering, you agree to our{" "}
-          <Text style={styles.link}>Terms of service</Text> and{" "}
-          <Text style={styles.link}>Privacy policy</Text>.
+          <Text style={styles.linkText}>Terms of service</Text> and{" "}
+          <Text style={styles.linkText}>Privacy policy</Text>.
         </Text>
-      </SafeAreaView>
-
+      </View>
+      
       {/* Language Selection Modal */}
       <Modal
-        visible={languageModalVisible}
+        animationType="slide"
         transparent={true}
-        animationType="fade"
-        onRequestClose={closeLanguageModal}
+        visible={languageModalVisible}
+        onRequestClose={() => setLanguageModalVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={closeLanguageModal}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={styles.languageModalContainer}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Change language</Text>
-                  <Text style={styles.modalSubtitle}>Which language do you prefer?</Text>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={closeLanguageModal}
-                  >
-                    <View style={styles.closeButtonCircle}>
-                      <Text style={styles.closeButtonText}>×</Text>
-                    </View>
-                  </TouchableOpacity>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Change language</Text>
+              <Text style={styles.modalSubtitle}>Which language do you prefer?</Text>
+              <TouchableOpacity 
+                style={styles.closeButton} 
+                onPress={() => setLanguageModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {languages.map((language) => (
+              <TouchableOpacity 
+                key={language.code}
+                style={styles.languageOption}
+                onPress={() => handleLanguageSelect(language)}
+              >
+                <Text style={styles.languageOptionText}>{language.name}</Text>
+                <View style={styles.radioButton}>
+                  {selectedLanguage.code === language.code && (
+                    <View style={styles.radioButtonSelected} />
+                  )}
                 </View>
-                <View style={styles.languageOptions}>
-                  {languages.map((language, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={styles.languageOption}
-                      onPress={() => selectLanguage(language.name)}
-                    >
-                      <Text style={styles.languageOptionText}>{language.name}</Text>
-                      <View style={styles.radioButton}>
-                        {selectedLanguage === language.name && (
-                          <View style={styles.radioButtonSelected} />
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <TouchableOpacity
-                  style={styles.continueButton}
-                  onPress={closeLanguageModal}
-                >
-                  <Text style={styles.continueButtonText}>
-                    Continue in {selectedLanguage}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
+              </TouchableOpacity>
+            ))}
+            
+            <TouchableOpacity 
+              style={styles.continueButton}
+              onPress={() => setLanguageModalVisible(false)}
+            >
+              <Text style={styles.continueButtonText}>Continue in {selectedLanguage.name}</Text>
+            </TouchableOpacity>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Modal>
-    </>
+    </View>
   );
 }
 
@@ -210,164 +159,163 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  statusBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 15,
-    paddingTop: 10,
-    height: 30,
-  },
-  timeText: {
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  statusIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  batteryContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  batteryText: {
-    fontSize: 12,
-    marginRight: 2,
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    width: "100%",
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    zIndex: 10,
   },
-  logoContainer: {
-    height: 36,
-    justifyContent: "center",
+  rightContainer: {
+    flex: 1,
+    alignItems: "flex-end",
+    paddingRight: 10,
   },
   logo: {
     width: 120,
-    height: 36,
-    resizeMode: "contain",
-  },
-  languageContainer: {
-    justifyContent: "center",
-    alignItems: "center",
+    height: 50,
   },
   languageButton: {
-    backgroundColor: "#F5F5F5",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    height: 36,
+    borderColor: "#e9ecef",
+    borderWidth: 1,
   },
   languageText: {
     fontSize: 14,
-    color: "#555",
+    fontWeight: "500",
+    color: "#333",
   },
-  slide: {
-    width: screenWidth,
-    height: 500,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
+  swiperContainer: {
+    flex: 1,
+    marginTop: -20, // Shifted content upward
+    position: 'relative',
   },
-  illustration: {
-    width: "90%",
-    height: 250,
-    resizeMode: "contain",
-    borderRadius: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 10,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#555",
-    textAlign: "center",
-  },
-  dotContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 140,
+    left: 0,
+    right: 0,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#ccc",
-    marginHorizontal: 5,
+    backgroundColor: "#D9D9D9",
+    marginHorizontal: 4,
   },
   activeDot: {
-    backgroundColor: "green",
+    width: 20,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#008000",
   },
-  buttonContainer: {
-    width: "100%",
+  slide: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start", 
     paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingTop: 80,
+  },
+  illustration: {
+    width: width * 0.9,
+    height: 200,
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 12,
+    textAlign: "center",
+    color: "#555",
+    marginHorizontal: 30,
+    marginBottom: 20, // Add more space below the description
+  },
+  bottomSection: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    backgroundColor: "white",
   },
   loginButton: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "green",
-    borderRadius: 25,
+    backgroundColor: "#008000",
+    width: "85%",
+    padding: 15,
+    borderRadius: 30,
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
+    marginVertical: 10,
   },
   loginText: {
-    color: "white",
+    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
   signupButton: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "white",
-    borderRadius: 25,
+    borderColor: "#008000",
     borderWidth: 1,
-    borderColor: "green",
+    width: "85%",
+    padding: 15,
+    borderRadius: 30,
     alignItems: "center",
-    justifyContent: "center",
+    marginBottom: 10,
   },
   signupText: {
-    color: "green",
+    color: "#008000",
     fontSize: 16,
     fontWeight: "bold",
   },
-  terms: {
-    fontSize: 12,
+  termsText: {
+    fontSize: 9,
     color: "#777",
-    textAlign: "center",
-    paddingHorizontal: 20,
+    textAlign: "left",
+    marginTop: 5,
+    paddingHorizontal: 30,
     marginBottom: 20,
   },
-  link: {
-    color: "green",
+  linkText: {
+    color: "#008000",
+    fontWeight: "bold",
   },
-  // Modal Styles
+  
+  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
-  languageModalContainer: {
+  modalContent: {
     backgroundColor: "white",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 40,
   },
   modalHeader: {
-    marginBottom: 20,
+    marginBottom: 15,
     position: "relative",
+    paddingBottom: 10,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 5,
   },
   modalSubtitle: {
     fontSize: 14,
@@ -375,10 +323,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 0,
     right: 0,
-  },
-  closeButtonCircle: {
+    top: 0,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -387,18 +333,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   closeButtonText: {
-    fontSize: 18,
-    lineHeight: 20,
+    fontSize: 14,
+    fontWeight: "600",
     color: "#666",
-  },
-  languageOptions: {
-    marginBottom: 20,
   },
   languageOption: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
@@ -410,7 +353,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#008000",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -418,14 +361,14 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "green",
+    backgroundColor: "#008000",
   },
   continueButton: {
-    backgroundColor: "green",
-    borderRadius: 50,
-    height: 50,
+    backgroundColor: "#008000",
+    paddingVertical: 15,
+    borderRadius: 30,
     alignItems: "center",
-    justifyContent: "center",
+    marginTop: 20,
   },
   continueButtonText: {
     color: "white",
