@@ -89,9 +89,9 @@ npm start or npm run web
 ```
 ### Output
 
-![alt text](<Screenshot from 2025-04-18 20-57-16.png>)
+![alt text](<expo-user-management/Screenshot from 2025-04-18 20-57-16.png>)
 
-![alt text](<Screenshot from 2025-04-18 20-10-47.png>)
+![alt text](<expo-user-management/Screenshot from 2025-04-18 20-10-47.png>)
 
 ### Observations & Results
 - Successfully implemented Supabase authentication using email and password.
